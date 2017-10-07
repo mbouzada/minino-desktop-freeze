@@ -1,0 +1,294 @@
+#!/bin/bash
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+# (c) Antonio Sánchez León, 2014 <introlinux[fix@]gmail[fix.]com>
+# (c) Miguel Anxo Bouzada, 2014 <mbouzada[fix@]gmail[fix.]com>
+# (c) GALPon MinNo Team, 2014 <minino[fix@]galpon[fix.]org>
+
+# "minino-desktop-freeze" was developed for GALPon MiniNo and PicarOS
+# distributions.
+# For the GUI uses "yad" <http://sourceforge.net/projects/yad-dialog/>.
+# It can be modified to work on any other OS
+
+## Translations ##
+case $LANG in
+	ca*)
+		TXTROOT="Has de executar aquest script amb «sudo»"
+		TIT1="Congelador de la configuració personal"
+		TXT1="Tria l'opció que vols aplicar"
+		BUT1="Sortir"
+		BUT2="Continuar"
+		ASK1="Congelar → Només l'escriptori i els panells"
+		ASK2="Congelar → Les configuracions d'escriptori i programes"
+		ASK3="Congelar → Tot el compte d'un usuari"
+		ASK4="Retirar el procés de restauració"
+		TIT2="Avís"
+		TXT2="No has triat l'opció \nque vols aplicar!"
+		BUT3="Tornar i seleccionar"
+		TIT3="Escollir usuari"
+		LABEL="Usuari:"
+		TXT3a="Escriu el <b>nom de l'usuari</b> a qui vols \nretirar-li el procés de restauració:"
+		TXT3b="Escriu el <b>nom de l'usuari</b> a qui vols \naplicar-li el procés de restauració:"
+		TIT4="Información"
+		TXT4="Proceso rematado"	
+	;;
+	es*)
+		TXTROOT="Tienes que ejecutar este script con «sudo»"
+		TIT1="Congelador de la configuración personal"
+		TXT1="Escoja la opción que quiere aplicar"
+		BUT1="Salir"
+		BUT2="Continuar"
+		ASK1="Congelar → Solo el escritorio y los paneles"
+		ASK2="Congelar → Las configuraciones de escritorio y programas"
+		ASK3="Congelar → Toda la cuenta de un usuario"
+		ASK4="Retirar el proceso de restauración"
+		TIT2="Aviso"
+		TXT2="¡No escogio la opción \nque quiere aplicar!"
+		BUT3="Volver y selecionar"
+		TIT3="Escoger usuario"
+		LABEL="Usuario:"
+		TXT3a="Escriba el <b>nombre del usuario</b> al que quiere \nretirarle el proceso de restauración:"
+		TXT3b="Escriba el <b>nombre del usuario</b> al que quiere \naplicarle el proceso de restauración:"
+		TIT4="Información"
+		TXT4="Proceso terminado"
+	;;
+	gl*)
+		TXTROOT="Tes que executar este script con «sudo»"
+		TIT1="Conxelador da configuración persoal"
+		TXT1="Escolla a opción que quere aplicar"
+		BUT1="Saír"
+		BUT2="Continuar"
+		ASK1="Conxelar → Só o escritorio e os paneis"
+		ASK2="Conxelar → As configuracións de escritorio e programas"
+		ASK3="Conxelar → Toda a conta dun usuario"
+		ASK4="Retirar o proceso de restauración"
+		TIT2="Aviso"
+		TXT2="Non escolleu a opción \nque quere aplicar!"
+		BUT3="Volver e selecionar"
+		TIT3="Escoller usuario"
+		LABEL="Usuario:"
+		TXT3a="Escriba o <b>nome do usuario</b> ao que quere \nretirarlle o proceso de restauración:"
+		TXT3b="Escriba o <b>nome do usuario</b> ao que quere \naplicarlle o proceso de restauración:"
+		TIT4="Información"
+		TXT4="Proceso rematado"
+	;;
+	*)
+		TXTROOT="You must run this script with \"sudo\""
+		TIT1="Personal configuration freezer"
+		TXT1="Choose the option you want to apply"
+		BUT1="Quit"
+		BUT2="Continue"
+		ASK1="Freeze → Only the desktop and panels"
+		ASK2="Freeze → The desktop and programs settings"
+		ASK3="Freeze → All a user account"
+		ASK4="Remove the restoration process"
+		TIT2="Warning"
+		TXT2="Not chose the option \nyou want to apply!"
+		BUT3="Back and selecting"
+		TIT3="Select user"
+		LABEL="User:"
+		TXT3a="Type <b>user name</b> you want to remove \nthe restoration process:"
+		TXT3b="Type <b>user name</b> you want to apply \nthe restoration process:"
+		TIT4="Information"
+		TXT4="Process complete"
+	;;
+esac
+
+
+[[ $(id -u) -ne 0 ]] && {
+	echo
+	echo "$TXTROOT"
+	echo
+	yad --button="gtk-close" \
+		--window-icon="face-angry"\
+		--image="face-angry" \
+		--title="$TIT2" \
+		--text="\n\t<span size='large' color='red'><b>$TXTROOT\t</b></span>"
+	exit 1
+}
+
+verificacion(){
+	# ver se o usuário premeu en «Saír» ou no «X» da xanela
+	ACCION="$?"
+	test "$ACCION" -eq "1" || test "$ACCION" -eq "252"
+	if [ "$?" -eq "0" ]; then
+		exit 1
+	fi
+}
+
+show_option(){
+
+ESCOLLIDO=$( yad --list \
+	--window-icon="user-desktop" \
+	--image="user-desktop" \
+	--title="$TIT1" \
+	--text="<b>$TXT1 </b>" \
+	--print-column=1 \
+	--no-headers \
+	--column="control" \
+	--column="accion" \
+	--hide-column=1 \
+	--width="450" \
+	--height="175" \
+	--button="$BUT1":1 \
+	--button="$BUT2":0 \
+	1 "$ASK1  " \
+	2 "$ASK2  " \
+	3 "$ASK3  " \
+	4 "$ASK4  " 
+)
+
+verificacion
+
+#captura só o numero da opción seleccionada
+ESCOLLIDO=$(echo ${ESCOLLIDO} | egrep -o '^[0-9]')
+
+if [ "${ESCOLLIDO}" = "" ]; then
+	yad --window-icon="face-angry"\
+		--image="face-angry" \
+		--title="$TIT2" \
+		--text "<b>$TXT2</b>" \
+		--button="$BUT3"
+	show_option
+fi
+
+}
+
+show_user(){
+
+if [ "${ESCOLLIDO}" = "4" ]; then
+	TEXT="$TXT3a"
+else
+	TEXT="$TXT3b"
+fi
+
+USUARIO=$( yad --entry \
+	--window-icon "user-home" \
+	--image="user-home" \
+	--title "$TIT3" \
+	--entry-text " " \
+	--entry-label "$LABEL" \
+	--text "${TEXT} "
+)
+
+verificacion
+}
+
+initiate_bkp(){
+	if test -e /usr/local/bin/gobohide; then
+		gobohide -f
+	fi
+	rm -rf /srv/${USUARIO} # opcionalmente rematar a ruta con: /{*,.*}
+}
+
+send_line(){
+	file_reload="/etc/X11/Xsession.d/51x11reload-desktop"
+		
+	if [ ! -f ${file_reload} ]; then
+		touch ${file_reload}
+	fi
+
+	EXIST=`grep ${USUARIO} ${file_reload}`
+	
+	if [ "${EXIST}" != "${line_to_send}" ]; then
+		sed -i "/${USUARIO}/ d" ${file_reload} # Eliminamos a liña do usuario	
+		echo ${line_to_send} >> ${file_reload}
+	fi
+	
+	sed -i '/^$/d'  ${file_reload} # Borramos as liñas baleiras que houber
+	sort ${file_reload} | uniq
+}
+
+bye_bye(){
+	yad --window-icon="face-angel"\
+		--image="face-angel" \
+		--title="$TIT4" \
+		--text "\n<b>$TXT4</b>" \
+		--button="gtk-close"
+}
+
+determine_distro(){
+	for BUSCA in MININO PicarOS 
+	do
+		ATOPA=`cat /etc/blkid.tab | grep "${BUSCA}" | awk -F'"' '{print $6}'`
+		if [[ "${ATOPA}" = "MININO" || "${ATOPA}" = "PicarOS" ]]; then DISTRO=${ATOPA}; fi
+	done
+		if [ "${DISTRO}" = "" ] ; then echo "Isto non foi desenvolvido para este sistema  operativo. \nPode adaptalo ás súas necesidades."; exit 1; fi
+}
+
+execution_func(){
+# de acordo coa opción seleccionada, executa o proceso correspondente
+case "$ESCOLLIDO" in
+	1)		
+		initiate_bkp
+		determine_distro
+		if [ "${DISTRO}" = "MININO" ]; then
+			rsync -va /home/${USUARIO}/.config/ /srv/${USUARIO}/ --include={autostart/***,libfm/***,lxpanel/***,lxsession/***,lxterminal/***,openbox/***,pcmanfm/***,lxtask.conf,Trolltech.conf,user-dirs.dirs,user-dirs.locale,yad.conf} --exclude='*'
+			line_to_send="rsync -va /srv/${USUARIO}/ /home/${USUARIO}/.config/"
+		elif  [ "${DISTRO}" = "PicarOS" ]; then
+			rsync -va /home/${USUARIO}/.config/ /srv/${USUARIO}/ --include={dconf/***,autostart/***,libfm/***,lxpanel/***,lxsession/***,lxterminal/***,openbox/***,pcmanfm/***,lxtask.conf,Trolltech.conf,user-dirs.dirs,user-dirs.locale,yad.conf,rox.sourceforge.net} --exclude='*'
+			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ 
+			line_to_send="rsync -va /srv/${USUARIO}/ /home/${USUARIO}/.config/;rsync -va --delete /srv/miniapps/* /usr/local/share/miniapps/"
+		fi		
+		send_line
+		bye_bye
+		;;
+	2)
+		initiate_bkp
+		determine_distro
+		if [ "${DISTRO}" = "MININO" ]; then
+			rsync -va --exclude='.Xauthority /home/${USUARIO}/.??* /srv/${USUARIO}'
+			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/.??* /home/${USUARIO}/"
+		elif  [ "${DISTRO}" = "PicarOS" ]; then
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/.??* /srv/${USUARIO}
+			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ 
+			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/.??* /home/${USUARIO}/;rsync -va --delete /srv/miniapps/* /usr/local/share/miniapps/"
+		fi
+		send_line
+		bye_bye
+		;;
+	3)
+		initiate_bkp
+		determine_distro
+		if [ "${DISTRO}" = "MININO" ]; then
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/ /srv/${USUARIO}
+			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/ /home/${USUARIO}/"
+		elif  [ "${DISTRO}" = "PicarOS" ]; then
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/ /srv/${USUARIO}
+			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ 
+			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/ /home/${USUARIO}/;rsync -va --delete /srv/miniapps/* /usr/local/share/miniapps/"
+		fi
+		send_line
+		bye_bye
+		;;
+	4)		
+		file_reload="/etc/X11/Xsession.d/51x11reload-desktop"
+		sed -i "/${USUARIO}/ d" ${file_reload} # Eliminamos a liña do usuario			
+		sed -i '/^$/d'  ${file_reload} # Borramos as liñas baleiras que houber		
+		EMPTY=`cat ${file_reload}`
+		if [ "${EMPTY}" = "" ]; then
+			rm ${file_reload}
+			rm -rf /srv/*
+		fi
+		bye_bye
+		;;
+esac
+}
+
+show_option
+show_user
+execution_func
+
+#.EOF
