@@ -5,4 +5,5 @@
 # Run with «sudo»
 
 cp minino-desktop-freeze /usr/local/bin/
-cp minino-desktop-freeze.desktop /usr/local/share/applications/minino
+chmod +x /usr/local/bin/minino-desktop-freeze
+cp minino-desktop-freeze.desktop /usr/local/share/applications/minino/

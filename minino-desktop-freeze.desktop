@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Desktop freezer
-Name[ca]=Congelador d'escriptori de Minino
-Name[es]=Congelador de escritorio
-Name[gl]=Conxelador de excritorio
+Name[ca]=Congelador d'escriptori de MiniNo
+Name[es]=Congelador de escritorio de MiniNo
+Name[gl]=Conxelador de escritorio do MiniNo
 Comment=Freeze/unfreeze the desktop or just the user settings
 Comment[ca]=Congela/descongela l'escriptori o només la configuració de l'usuari
 Comment[es]=Congela/descongela el escritorio o solo la configuración del usuario
@@ -10,5 +10,5 @@ Comment[gl]=Conxela/desconxela o escritorio ou só a configuración do usuario
 Type=Application
 Terminal=false
 Icon=lock
-Exec=gksudo minino-desktop-freeze
+Exec=gksu minino-desktop-freeze
 Categories=Minino
