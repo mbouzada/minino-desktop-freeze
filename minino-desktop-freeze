@@ -39,8 +39,8 @@ case $LANG in
 		BUT3="Tornar i seleccionar"
 		TIT3="Escollir usuari"
 		LABEL="Usuari:"
-		TXT3a="Escriu el <b>nom de l'usuari</b> a qui vols \nretirar-li el procés de congelació i restauració:"
-		TXT3b="Escriu el <b>nom de l'usuari</b> a qui vols \naplicar-li el procés de congelació i restauració:"
+		TXT3a="Escriu el <b>nom de l'usuari</b> a qui vols retirar-li \nel procés de congelació i restauració:"
+		TXT3b="Escriu el <b>nom de l'usuari</b> a qui vols aplicar-li \nel procés de congelació i restauració:"
 		TIT4="Información"
 		TXT4="Proceso rematado"	
 	;;
@@ -59,8 +59,8 @@ case $LANG in
 		BUT3="Volver y selecionar"
 		TIT3="Escoger usuario"
 		LABEL="Usuario:"
-		TXT3a="Escriba el <b>nombre del usuario</b> al que quiere \nretirarle el proceso de congelación y restauración:"
-		TXT3b="Escriba el <b>nombre del usuario</b> al que quiere \naplicarle el proceso de congelación y restauración:"
+		TXT3a="Escriba el <b>nombre del usuario</b> al que quiere retirarle \nel proceso de congelación y restauración:"
+		TXT3b="Escriba el <b>nombre del usuario</b> al que quiere aplicarle \nel proceso de congelación y restauración:"
 		TIT4="Información"
 		TXT4="Proceso terminado"
 	;;
@@ -79,8 +79,8 @@ case $LANG in
 		BUT3="Volver e selecionar"
 		TIT3="Escoller usuario"
 		LABEL="Usuario:"
-		TXT3a="Escriba o <b>nome do usuario</b> ao que quere \nretirarlle o proceso de conxelación e restauración:"
-		TXT3b="Escriba o <b>nome do usuario</b> ao que quere \naplicarlle o proceso de conxelación e restauración:"
+		TXT3a="Escriba o <b>nome do usuario</b> ao que quere retirarlle \no proceso de conxelación e restauración:"
+		TXT3b="Escriba o <b>nome do usuario</b> ao que quere aplicarlle \no proceso de conxelación e restauración:"
 		TIT4="Información"
 		TXT4="Proceso rematado"
 	;;
