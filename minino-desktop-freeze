@@ -65,7 +65,7 @@ case $LANG in
 		TXT3b="Escriba el <b>nombre del usuario</b> al que quiere aplicarle \nel proceso de congelación y restauración:"
 		TIT4="Información"
 		TXT4="Proceso terminado"
-		TXT5="No indico que usuario \nquiere modificar>"	
+		TXT5="No indicó que usuario \nquiere modificar>"	
 		TXT6="El usuario indicado \n<b>${USUARIO}</b> \nno existe,\nindique otro usuario"
 	;;
 	gl*)
