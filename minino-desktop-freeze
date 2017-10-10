@@ -42,7 +42,9 @@ case $LANG in
 		TXT3a="Escriu el <b>nom de l'usuari</b> a qui vols retirar-li \nel procés de congelació i restauració:"
 		TXT3b="Escriu el <b>nom de l'usuari</b> a qui vols aplicar-li \nel procés de congelació i restauració:"
 		TIT4="Información"
-		TXT4="Proceso rematado"	
+		TXT4="Proceso rematado"
+		TXT5="No va indicar que usuari \nvol modificar"	
+		TXT6="L'usuari indicat \n<b>${USUARIO}</b> \nno existeix, \n indiqui un altre usuari"
 	;;
 	es*)
 		TXTROOT="Tienes que ejecutar este script con «sudo»"
@@ -63,6 +65,8 @@ case $LANG in
 		TXT3b="Escriba el <b>nombre del usuario</b> al que quiere aplicarle \nel proceso de congelación y restauración:"
 		TIT4="Información"
 		TXT4="Proceso terminado"
+		TXT5="No indico que usuario \nquiere modificar>"	
+		TXT6="El usuario indicado \n<b>${USUARIO}</b> \nno existe,\nindique otro usuario"
 	;;
 	gl*)
 		TXTROOT="Tes que executar este script con «sudo»"
@@ -83,6 +87,8 @@ case $LANG in
 		TXT3b="Escriba o <b>nome do usuario</b> ao que quere aplicarlle \no proceso de conxelación e restauración:"
 		TIT4="Información"
 		TXT4="Proceso rematado"
+		TXT5="Non indicou que usuario \nquere modificar</b>"	
+		TXT6="O usuario indicado \n<b>${USUARIO}</b> \nnon existe,\nindique outro usuario"
 	;;
 	*)
 		TXTROOT="You must run this script with \"sudo\""
@@ -103,6 +109,8 @@ case $LANG in
 		TXT3b="Type <b>user name</b> you want to apply \nthe freezing and restoration process:"
 		TIT4="Information"
 		TXT4="Process complete"
+		TXT5="Do not indicate which user \nwants to modify"	
+		TXT6="The specified user \n<b>${USUARIO}</b> \n does not exist, \nindicate another user"
 	;;
 esac
 
@@ -120,7 +128,8 @@ esac
 }
 
 verificacion(){
-	# ver se o usuário premeu en «Saír» ou no «X» da xanela
+	# Ver se o usuário premeu en «Saír» ou no «X» da xanela
+	# See if the user pressed in «Exit» or in «X» in the window
 	ACCION="$?"
 	test "$ACCION" -eq "1" || test "$ACCION" -eq "252"
 	if [ "$?" -eq "0" ]; then
@@ -131,8 +140,8 @@ verificacion(){
 show_option(){
 
 ESCOLLIDO=$( yad --list \
-	--window-icon="user-desktop" \
-	--image="user-desktop" \
+	--window-icon="system-run" \
+	--image="system-run" \
 	--title="$TIT1" \
 	--text="<b>$TXT1 </b>" \
 	--print-column=1 \
@@ -152,7 +161,9 @@ ESCOLLIDO=$( yad --list \
 
 verificacion
 
-#captura só o numero da opción seleccionada
+# Captura só o numero da opción seleccionada
+# Capture only the number of the selected option
+
 ESCOLLIDO=$(echo ${ESCOLLIDO} | egrep -o '^[0-9]')
 
 if [ "${ESCOLLIDO}" = "" ]; then
@@ -175,13 +186,38 @@ else
 fi
 
 USUARIO=$( yad --entry \
-	--window-icon "user-home" \
-	--image="user-home" \
+	--window-icon "system-users" \
+	--image="system-users" \
 	--title "$TIT3" \
 	--entry-text " " \
 	--entry-label "$LABEL" \
 	--text "${TEXT} "
 )
+
+verificacion
+
+if [ "${USUARIO}" = "" ]; then
+	yad --window-icon="face-angry"\
+		--image="face-angry" \
+		--title="$TIT2" \
+		--text "<b>$TXT5</b> " \
+		--button="$BUT3"
+	show_user
+fi
+
+verificacion
+
+# Buscamos se existe, en /etc/passwd o usuario indicado
+# We look for if it exists, in /etc/passwd the indicated user
+readUser=`cat /etc/passwd | grep ${USUARIO} | cut -f1 -d:`
+if [ "${readUser}" = "" ]; then 
+	yad --window-icon="face-angry"\
+		--image="face-angry" \
+		--title="$TIT2" \
+		--text "${TXT6} " \
+		--button="$BUT3"
+	show_user
+fi
 
 verificacion
 }
@@ -190,7 +226,7 @@ initiate_bkp(){
 	if test -e /usr/local/bin/gobohide; then
 		gobohide -f
 	fi
-	rm -rf /srv/${USUARIO} # opcionalmente rematar a ruta con: /{*,.*}
+	rm -rf /srv/${USUARIO} # Opcionalmente rematar a ruta con: /{*,.*} # Optionally end the path with: /{*,.*}
 }
 
 send_line(){
@@ -220,16 +256,31 @@ bye_bye(){
 }
 
 determine_distro(){
-	for BUSCA in MININO PicarOS 
-	do
-		ATOPA=`cat /etc/blkid.tab | grep "${BUSCA}" | awk -F'"' '{print $6}'`
-		if [[ "${ATOPA}" = "MININO" || "${ATOPA}" = "PicarOS" ]]; then DISTRO=${ATOPA}; fi
-	done
-		if [ "${DISTRO}" = "" ] ; then echo "Isto non foi desenvolvido para este sistema  operativo. \nPode adaptalo ás súas necesidades."; exit 1; fi
+# Buscar se a distro e unha MiniNo ou unha PicarOS
+# Find if the distribution is a MiniNo or a PicarOS
+#	for BUSCA in MININO PicarOS 
+#	do
+#		ATOPA=`cat /etc/blkid.tab | grep "${BUSCA}" | awk -F'"' '{print $6}'`
+#		if [[ "${ATOPA}" = "MININO" || "${ATOPA}" = "PicarOS" ]]; then DISTRO=${ATOPA}; fi
+#	done
+	BUSCA=`ls /dev/disk/by-label | grep "PicarOS"`
+	DISTRO=${BUSCA}
+	if [ "${DISTRO}" = "" ]; then
+		BUSCA=`ls /dev/disk/by-label | grep "MININO"`
+		DISTRO=${BUSCA}	
+	fi
+		if [ "${DISTRO}" = "" ] ; then echo "/n/nIsto non foi desenvolvido para este sistema  operativo.
+Pode adaptalo ás súas necesidades.
+
+This was not developed for this operating system.
+You can adapt it to your needs."
+		exit 1
+	fi
 }
 
 execution_func(){
-# de acordo coa opción seleccionada, executa o proceso correspondente
+# De acordo coa opción seleccionada, executa os procesos correspondentes
+# According to the selected option, execute the corresponding processes
 case "$ESCOLLIDO" in
 	1)		
 		initiate_bkp
@@ -275,8 +326,8 @@ case "$ESCOLLIDO" in
 		;;
 	4)		
 		file_reload="/etc/X11/Xsession.d/51x11reload-desktop"
-		sed -i "/${USUARIO}/ d" ${file_reload} # Eliminamos a liña do usuario			
-		sed -i '/^$/d'  ${file_reload} # Borramos as liñas baleiras que houber		
+		sed -i "/${USUARIO}/ d" ${file_reload} # Eliminamos a liña do usuario # We eliminate the user's line  	
+		sed -i '/^$/d'  ${file_reload} # Borramos as liñas baleiras que houber # We clear the empty lines there are  	
 		EMPTY=`cat ${file_reload}`
 		if [ "${EMPTY}" = "" ]; then
 			rm ${file_reload}
