@@ -185,11 +185,13 @@ else
 	TEXT="$TXT3b"
 fi
 
+defaultUser="minino"
+
 USUARIO=$( yad --entry \
 	--window-icon "system-users" \
 	--image="system-users" \
 	--title "$TIT3" \
-	--entry-text " " \
+	--entry-text "${defaultUser}" \
 	--entry-label "$LABEL" \
 	--text "${TEXT} "
 )
