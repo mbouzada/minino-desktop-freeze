@@ -94,7 +94,7 @@ case $LANG in
 		TXT5="Non indicou que usuario \nquere modificar</b>"	
 		TXT6="O usuario indicado \n<b>${USUARIO}</b> \nnon existe,\nindique outro usuario"
 		TIT5="Conxelando"
-		TXT7="\nXerando salvaguardas \n"
+		TXT7="\nXerando salvagardas \n"
 	;;
 	*)
 		TXTROOT="You must run this script with \"sudo\""
