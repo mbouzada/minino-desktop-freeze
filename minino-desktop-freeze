@@ -45,6 +45,8 @@ case $LANG in
 		TXT4="Proceso rematado"
 		TXT5="No va indicar que usuari \nvol modificar"	
 		TXT6="L'usuari indicat \n<b>${USUARIO}</b> \nno existeix, \n indiqui un altre usuari"
+		TIT5="Congelant"
+		TXT7="\nGenerando salvaguardes \n"
 	;;
 	es*)
 		TXTROOT="Tienes que ejecutar este script con «sudo»"
@@ -67,6 +69,8 @@ case $LANG in
 		TXT4="Proceso terminado"
 		TXT5="No indicó que usuario \nquiere modificar>"	
 		TXT6="El usuario indicado \n<b>${USUARIO}</b> \nno existe,\nindique otro usuario"
+		TIT5="Congelando"
+		TXT7="\nGenerando salvaguardas \n"
 	;;
 	gl*)
 		TXTROOT="Tes que executar este script con «sudo»"
@@ -89,6 +93,8 @@ case $LANG in
 		TXT4="Proceso rematado"
 		TXT5="Non indicou que usuario \nquere modificar</b>"	
 		TXT6="O usuario indicado \n<b>${USUARIO}</b> \nnon existe,\nindique outro usuario"
+		TIT5="Conxelando"
+		TXT7="\nXerando salvaguardas \n"
 	;;
 	*)
 		TXTROOT="You must run this script with \"sudo\""
@@ -111,6 +117,8 @@ case $LANG in
 		TXT4="Process complete"
 		TXT5="Do not indicate which user \nwants to modify"	
 		TXT6="The specified user \n<b>${USUARIO}</b> \n does not exist, \nindicate another user"
+		TIT5="Freezing"
+		TXT7="\nGenerating safeguards \n"
 	;;
 esac
 
@@ -280,6 +288,11 @@ You can adapt it to your needs."
 	fi
 }
 
+progress(){
+	yad --progress --pulsate --auto-close --auto-kill --title "${TIT5}" --text "${TXT7}" \
+		--window-icon "lock" --image "lock"
+}
+
 execution_func(){
 # De acordo coa opción seleccionada, executa os procesos correspondentes
 # According to the selected option, execute the corresponding processes
@@ -288,11 +301,11 @@ case "$ESCOLLIDO" in
 		initiate_bkp
 		determine_distro
 		if [ "${DISTRO}" = "MININO" ]; then
-			rsync -va /home/${USUARIO}/.config/ /srv/${USUARIO}/ --include={autostart/***,libfm/***,lxpanel/***,lxsession/***,lxterminal/***,openbox/***,pcmanfm/***,lxtask.conf,Trolltech.conf,user-dirs.dirs,user-dirs.locale,yad.conf} --exclude='*'
+			rsync -va /home/${USUARIO}/.config/ /srv/${USUARIO}/ --include={autostart/***,libfm/***,lxpanel/***,lxsession/***,lxterminal/***,openbox/***,pcmanfm/***,lxtask.conf,Trolltech.conf,user-dirs.dirs,user-dirs.locale,yad.conf} --exclude='*' | progress
 			line_to_send="rsync -va /srv/${USUARIO}/ /home/${USUARIO}/.config/"
 		elif  [ "${DISTRO}" = "PicarOS" ]; then
-			rsync -va /home/${USUARIO}/.config/ /srv/${USUARIO}/ --include={dconf/***,autostart/***,libfm/***,lxpanel/***,lxsession/***,lxterminal/***,openbox/***,pcmanfm/***,lxtask.conf,Trolltech.conf,user-dirs.dirs,user-dirs.locale,yad.conf,rox.sourceforge.net} --exclude='*'
-			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ 
+			rsync -va /home/${USUARIO}/.config/ /srv/${USUARIO}/ --include={dconf/***,autostart/***,libfm/***,lxpanel/***,lxsession/***,lxterminal/***,openbox/***,pcmanfm/***,lxtask.conf,Trolltech.conf,user-dirs.dirs,user-dirs.locale,yad.conf,rox.sourceforge.net} --exclude='*' | progress
+			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ | progress
 			line_to_send="rsync -va /srv/${USUARIO}/ /home/${USUARIO}/.config/;rsync -va --delete /srv/miniapps/* /usr/local/share/miniapps/"
 		fi		
 		send_line
@@ -302,11 +315,11 @@ case "$ESCOLLIDO" in
 		initiate_bkp
 		determine_distro
 		if [ "${DISTRO}" = "MININO" ]; then
-			rsync -va --exclude='.Xauthority /home/${USUARIO}/.??* /srv/${USUARIO}'
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/.??* /srv/${USUARIO} | progress
 			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/.??* /home/${USUARIO}/"
 		elif  [ "${DISTRO}" = "PicarOS" ]; then
-			rsync -va --exclude='.Xauthority' /home/${USUARIO}/.??* /srv/${USUARIO}
-			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ 
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/.??* /srv/${USUARIO} | progress
+			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/  | progress
 			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/.??* /home/${USUARIO}/;rsync -va --delete /srv/miniapps/* /usr/local/share/miniapps/"
 		fi
 		send_line
@@ -316,11 +329,11 @@ case "$ESCOLLIDO" in
 		initiate_bkp
 		determine_distro
 		if [ "${DISTRO}" = "MININO" ]; then
-			rsync -va --exclude='.Xauthority' /home/${USUARIO}/ /srv/${USUARIO}
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/ /srv/${USUARIO} | progress
 			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/ /home/${USUARIO}/"
 		elif  [ "${DISTRO}" = "PicarOS" ]; then
-			rsync -va --exclude='.Xauthority' /home/${USUARIO}/ /srv/${USUARIO}
-			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/ 
+			rsync -va --exclude='.Xauthority' /home/${USUARIO}/ /srv/${USUARIO} | progress
+			rsync -va /usr/local/share/miniapps/*	/srv/miniapps/  | progress
 			line_to_send="rsync -va --exclude='.Xauthority' --delete /srv/${USUARIO}/ /home/${USUARIO}/;rsync -va --delete /srv/miniapps/* /usr/local/share/miniapps/"
 		fi
 		send_line
